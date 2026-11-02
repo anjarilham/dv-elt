@@ -1,0 +1,38 @@
+# -----------------------------------------------------------------
+# Dataverse ETL Pipeline  Requirements
+# -----------------------------------------------------------------
+
+# S3 client
+boto3
+
+# duckdb
+duckdb
+
+# Async HTTP client (API calls to Dataverse)
+aiohttp>=3.9.0
+
+# YAML config parsing
+PyYAML>=6.0
+
+# Data processing
+pandas>=2.0.0
+numpy>=1.26.0
+
+# Fuzzy string matching (author & affiliation standardization)
+thefuzz>=0.22.0
+python-Levenshtein>=0.25.0   # optional but strongly recommended  speeds up thefuzz
+
+# Google Sheets export
+gspread>=6.0.0
+gspread-dataframe>=4.0.0
+
+# PostgreSQL
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0       # use psycopg2 (non-binary) for production deployments
+
+# Environment variable loading (.env support)
+python-dotenv>=1.0.0
+
+# Data quality validation -- runs against transform()'s output before
+# load_to_postgres(), so this ships with the pipeline itself, not just dev/test
+great-expectations>=1.0.0

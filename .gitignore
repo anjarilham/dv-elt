@@ -1,0 +1,71 @@
+# ---------------------------------------------------------------------------
+# Secrets and local configuration
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+gsheet_credential.json
+*credential*.json
+*service-account*.json
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+.eggs/
+build/
+dist/
+pip-wheel-metadata/
+
+# Tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.coverage
+htmlcov/
+
+# ---------------------------------------------------------------------------
+# Logs and local run artifacts
+# ---------------------------------------------------------------------------
+logs/
+*.log
+
+# Local databases / columnar files
+*.duckdb
+*.duckdb.wal
+*.db
+*.sqlite
+*.sqlite3
+*.parquet
+
+# ---------------------------------------------------------------------------
+# Large generated / downloaded data (kept out of git)
+# ---------------------------------------------------------------------------
+ds_summary.json
+unique_datasets.json
+playground_extractor.ipynb
+data/
+raw/
+tmp/
+scratch/
+
+# ---------------------------------------------------------------------------
+# OS and editor files
+# ---------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+
+# Claude Code local (per-machine) settings
+.claude/settings.local.json
