@@ -14,28 +14,21 @@ class Config:
     an extraction.
 
     Attributes:
-        Dataverse (used by extractor.py and main.py):
-            api_token: API token, sent as the X-Dataverse-key header.
+        Dataverse (used by extractor.py and extractor_main.py):
             base_url: Dataverse server root URL, without a trailing slash.
             search_query: text sent as the search "q" parameter. Defaults to "*" (everything).
             all_dataverse_list: dataverse aliases to extract. At least one, no duplicates.
             search_date_range_start, search_date_range_end: YYYY-MM-DD strings, or None when
                 no date filter is wanted. Either both are set or both are None.
 
-        MinIO / S3 raw storage (used by raw_store.py and main.py):
+        MinIO / S3 raw storage (used by raw_store.py and extractor_main.py):
             minio_endpoint: server URL including the scheme, e.g. "http://localhost:9000".
             minio_access_key, minio_secret_key: credentials.
-            minio_bucket: bucket for the raw layer. Defaults to "raw".
-            minio_silver_bucket: bucket for the silver layer (used by silver.py). Defaults to
-                "silver".
+            minio_bucket: bucket for the raw (bronze) layer. Defaults to "raw".
 
-        Logging (used by main.py):
-            log_file: base name of the log file, without ".log". main.py adds a timestamp and
-                the extension. Defaults to "pipeline".
-
-        Later pipeline stages (not used by the extraction yet):
-            validation_fields, fuzzy_score_cutoff, pg_host, pg_port, pg_user, pg_password,
-            database, pg_schema, gsheet_credential_file, sheet_id.
+        Logging (used by extractor_main.py):
+            log_file: base name of the log file, without ".log". extractor_main.py adds a timestamp
+                and the extension. Defaults to "pipeline".
     """
 
     def __init__(self, env_file: str | None = None):
@@ -59,7 +52,6 @@ class Config:
         # Dataverse
         # ------------------------------------------------------------
 
-        self.api_token = self._required("API_TOKEN")
         self.base_url = self._url("BASE_URL")
 
         self.search_query = self._optional("SEARCH_QUERY", "*")
@@ -95,56 +87,13 @@ class Config:
         self.minio_access_key = self._required("MINIO_ACCESS_KEY")
         self.minio_secret_key = self._required("MINIO_SECRET_KEY")
         self.minio_bucket = self._bucket("MINIO_BUCKET", default="raw")
-        self.minio_silver_bucket = self._bucket("MINIO_SILVER_BUCKET", default="silver")
 
         # ------------------------------------------------------------
         # Logging
         # ------------------------------------------------------------
 
-        # Accept "pipeline" and "pipeline.log" alike: main.py adds the timestamp and ".log".
+        # Accept "pipeline" and "pipeline.log" alike: extractor_main.py adds the timestamp and ".log".
         self.log_file = self._optional("LOG_FILE", "pipeline").removesuffix(".log")
-
-        # ------------------------------------------------------------
-        # Later pipeline stages (validation)
-        # ------------------------------------------------------------
-
-        self.validation_fields = self._list(
-            "VALIDATION_FIELDS"
-        )
-
-        self.fuzzy_score_cutoff = self._int(
-            "FUZZY_SCORE_CUTOFF",
-            default=90
-        )
-
-        # ------------------------------------------------------------
-        # PostgreSQL
-        # ------------------------------------------------------------
-
-        self.pg_host = self._required("PG_HOST")
-
-        self.pg_port = self._int(
-            "PG_PORT",
-            default=5432
-        )
-
-        self.pg_user = self._required("PG_USER")
-
-        self.pg_password = self._required("PG_PASSWORD")
-
-        self.database = self._required("DATABASE")
-
-        self.pg_schema = self._required("PG_SCHEMA")
-
-        # ------------------------------------------------------------
-        # Google Sheets
-        # ------------------------------------------------------------
-
-        self.gsheet_credential_file = self._required(
-            "GSHEET_CREDENTIAL_FILE"
-        )
-
-        self.sheet_id = self._required("SHEET_ID")
 
     # ================================================================
     # Helper methods
@@ -155,7 +104,7 @@ class Config:
         """Get a required environment variable.
 
         Arguments:
-            name: name of the environment variable, e.g. "API_TOKEN".
+            name: name of the environment variable, e.g. "BASE_URL".
 
         Returns:
             str: the value, exactly as set.

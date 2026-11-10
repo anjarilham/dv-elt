@@ -15,7 +15,7 @@ RETRYABLE_STATUS = {429, 500, 502, 503, 504}
 class ExtractionError(Exception):
     """Base class for anything that makes an extraction run untrustworthy.
 
-    Catch this one class to handle every extraction failure in a single place (main.py does).
+    Catch this one class to handle every extraction failure in a single place (extractor_main.py does).
     Subclasses say what went wrong: RequestFailedError and IncompleteExtractionError.
     """
 
@@ -50,7 +50,6 @@ class DatasetExtract:
 
     Attributes:
         config: the settings object passed in.
-        headers: HTTP headers sent with every request (holds the API token).
         base_url: Dataverse server root URL.
         dataverse_list: dataverse aliases from the config (the methods take the alias as an
             argument, so this is only kept for convenience).
@@ -71,7 +70,6 @@ class DatasetExtract:
 
         Arguments:
             config: settings object (see config.py). It must provide:
-                api_token: sent as the X-Dataverse-key header.
                 base_url: Dataverse server root URL.
                 all_dataverse_list: list of dataverse aliases.
                 search_query: the "q" search text, "*" for everything.
@@ -79,7 +77,6 @@ class DatasetExtract:
                     for no date filter.
         """
         self.config = config
-        self.headers = {"X-Dataverse-key": self.config.api_token}
         self.base_url = self.config.base_url
         self.dataverse_list = self.config.all_dataverse_list
         self.search_query = self.config.search_query
@@ -142,7 +139,7 @@ class DatasetExtract:
 
         for attempt in range(1, self.retries + 1):
             try:
-                async with self._session.get(url, headers=self.headers, params=params) as response:
+                async with self._session.get(url, params=params) as response:
                     if response.status == 200:
                         return await response.json()
 
@@ -150,7 +147,7 @@ class DatasetExtract:
                     last_error = f"HTTP {response.status}: {body}"
 
                     if response.status not in RETRYABLE_STATUS:
-                        # Our request is wrong (bad token, wrong URL, ...): fail immediately.
+                        # Our request is wrong (wrong URL, ...): fail immediately.
                         raise RequestFailedError(f"Non-retryable error for {url}. {last_error}")
 
             except RequestFailedError:
@@ -170,8 +167,8 @@ class DatasetExtract:
 
         Pages through /api/search with type=dataverse, 1000 results at a time (the API maximum),
         the same way extract_dataverse pages through datasets. The query is always "*" (match
-        everything) and no date filter or subtree is applied, so the result is every dataverse
-        the API key can see, sub-dataverses included. The first page reports total_count, and when
+        everything) and no date filter or subtree is applied, so the result is every public
+        dataverse in the installation, sub-dataverses included. The first page reports total_count, and when
         paging ends the number retrieved is compared with it.
 
         Returns:

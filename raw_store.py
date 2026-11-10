@@ -161,7 +161,7 @@ class RawStore:
             run_params: new run only. Dict describing how the run is configured (base_url,
                 search_query, date range, "dataverses" list, ...). It is saved in the manifest, and
                 its "dataverses" entry lets finalize() detect dataverses that were never processed.
-                Never put secrets such as the API token in it. Ignored when run_id is given (the
+                Never put secrets in it. Ignored when run_id is given (the
                 saved params are loaded instead).
             run_id: id of an existing run to attach to, or None to start a new run.
 
